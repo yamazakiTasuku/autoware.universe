@@ -6,6 +6,9 @@ autoware_package()
 
 find_package(OpenCV REQUIRED)
 
+find_package(Boost REQUIRED)
+
+
 ament_auto_add_library(behavior_path_planner_node SHARED
   src/behavior_path_planner_node.cpp
   src/behavior_tree_manager.cpp
@@ -47,12 +50,15 @@ target_link_libraries(behavior_path_planner_node
   ${OpenCV_LIBRARIES}
 )
 
+
 rclcpp_components_register_node(behavior_path_planner_node
   PLUGIN "behavior_path_planner::BehaviorPathPlannerNode"
   EXECUTABLE behavior_path_planner
 )
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_ros REQUIRED)
+
   ament_add_ros_isolated_gmock(test_${CMAKE_PROJECT_NAME}_utilities
     test/input.cpp
     test/test_utilities.cpp
@@ -68,12 +74,10 @@ if(BUILD_TESTING)
   target_link_libraries(test_${CMAKE_PROJECT_NAME}_avoidance_module
     behavior_path_planner_node
   )
-  
-  ament_add_ros_isolated_gmock(test_${CMAKE_PROJECT_NAME}_voidance_module
-    test/test_sumple.cpp
-  )
 
-  target_link_libraries(test_${CMAKE_PROJECT_NAME}_voidance_module
+  ament_add_ros_isolated_gtest(sample_test_behavior test/test_behavior_sample.cpp)
+
+  target_link_libraries(sample_test_behavior
     behavior_path_planner_node
   )
 
@@ -86,6 +90,8 @@ if(BUILD_TESTING)
   )
 
 endif()
+
+
 
 ament_auto_package(
   INSTALL_TO_SHARE
