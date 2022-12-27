@@ -11,6 +11,7 @@ find_package(Boost REQUIRED)
 
 ament_auto_add_library(behavior_path_planner_node SHARED
   src/behavior_path_planner_node.cpp
+  src/checker.cpp
   src/behavior_tree_manager.cpp
   src/utilities.cpp
   src/path_utilities.cpp
@@ -75,9 +76,9 @@ if(BUILD_TESTING)
     behavior_path_planner_node
   )
 
-  ament_add_ros_isolated_gtest(sample_test_behavior test/test_behavior_sample.cpp)
-
-  target_link_libraries(sample_test_behavior
+  file(GLOB_RECURSE test_files test/src/*.cpp)
+  ament_add_ros_isolated_gtest(test_sample_behavior_module  ${test_files})
+  target_link_libraries(test_sample_behavior_module
     behavior_path_planner_node
   )
 
