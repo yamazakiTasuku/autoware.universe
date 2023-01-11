@@ -30,6 +30,7 @@ foreach(scene_module IN LISTS scene_modules)
 endforeach()
 
 ament_auto_add_library(behavior_velocity_planner SHARED
+  src/checker.cpp
   src/node.cpp
   src/planner_manager.cpp
   src/utilization/path_utilization.cpp
@@ -81,6 +82,17 @@ if(BUILD_TESTING)
     gtest_main
     behavior_velocity_planner
   )
+
+  # Sample test
+  ament_add_ros_isolated_gtest(pathChecker-test
+    test/src/test_sample.cpp
+    test/src/test_path_checker.cpp
+  )
+  target_link_libraries(pathChecker-test
+    gtest_main
+    behavior_velocity_planner
+  )
+
 endif()
 
 ament_auto_package(INSTALL_TO_SHARE

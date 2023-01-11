@@ -255,6 +255,16 @@ bool BehaviorVelocityPlannerNode::isDataReady(
   return true;
 }
 
+bool BehaviorVelocityPlannerNode::pathChecker(
+  const autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg) const
+{
+  if (input_path_msg->points.empty()) {
+    RCLCPP_INFO(get_logger(),"points is empty");
+    return false;
+  }
+  return true;
+}
+
 void BehaviorVelocityPlannerNode::onOccupancyGrid(
   const nav_msgs::msg::OccupancyGrid::ConstSharedPtr msg)
 {
