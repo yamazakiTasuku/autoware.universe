@@ -424,6 +424,12 @@ void BehaviorVelocityPlannerNode::onTrigger(
     return;
   }
 
+  if(!pathChecker(input_path_msg)){
+    const std::runtime_error e("points are not given.");
+    throw e;
+    return;
+  }
+
   if (!isDataReady(planner_data_, *get_clock())) {
     mutex_.unlock();
     return;

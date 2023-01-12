@@ -31,7 +31,7 @@ namespace behavior_path_checker
 using autoware_auto_planning_msgs::msg::Trajectory;
 using geometry_msgs::msg::TwistStamped;
 using nav_msgs::msg::Odometry;
-using autoware_auto_planning_msgs::msg::PathWithLaneId;
+
 
 class PathPlannerCheckerBase
 {

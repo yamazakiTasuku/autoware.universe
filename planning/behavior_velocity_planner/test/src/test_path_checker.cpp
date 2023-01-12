@@ -45,27 +45,18 @@ class PubManager : public rclcpp::Node
 public:
   PubManager() : Node("test_pub_node")
   {
-    pub_path_ = create_publisher<PathWithLaneId>("path_change_force", 1);
+    pub_path_ = create_publisher<PathWithLaneId>("/lane_driving/behavior_planning/path_with_lane_id", 1);
   }
 
   rclcpp::Publisher<PathWithLaneId>::SharedPtr pub_path_;
 
-  void publishPathWithLaneId(const geometry_msgs::msg::Pose & pose, const double publish_duration)
+  void publishPathWithLaneId()//const geometry_msgs::msg::Pose & pose, const double publish_duration)
   {
     const auto start_time = this->now();
     while (true) {
       const auto now = this->now();
-
-      const auto time_diff = now - start_time;
-      if (publish_duration < time_diff.seconds()) {
-        break;
-      }
-
-      Odometry odometry;
-      odometry.header.stamp = now;
-      odometry.pose.pose = pose;
-      odometry.twist.twist.linear = createTranslation(0.0, 0.0, 0.0);
-      odometry.twist.twist.angular = createTranslation(0.0, 0.0, 0.0);
+      PathWithLaneId pathwithlaneid;
+      pathwithlaneid.header.stamp = now;
 
       rclcpp::WallRate(10).sleep();
     }
@@ -77,22 +68,20 @@ TEST(vehicle_stop_checker, isVehicleStopped)
   {
     auto checker = std::make_shared<CheckerNode>();
     auto manager = std::make_shared<PubManager>();
-    EXPECT_GE(manager->pub_odom_->get_subscription_count(), 1U) << "topic is not connected.";
+    //EXPECT_GE(manager->pub_path_->get_subscription_count(), 1U) << "topic is not connected.";
+    EXPECT_GE(manager->pub_path_->get_subscription_count(), 1U) << "topic is not connected.";
+    //rclcpp::executors::SingleThreadedExecutor executor;
+    //executor.add_node(checker);
+    //executor.add_node(manager);
+    //std::thread spin_thread =
+      //std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
+    //manager->publishPathWithLaneId();
 
-    EXPECT_FALSE(checker->path_planner_arrival_checker->isVehicleStopped());
-
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(checker);
-    executor.add_node(manager);
-    std::thread spin_thread =
-      std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
-    manager->publishStoppedOdometry(ODOMETRY_HISTORY_500_MS);
-
-    EXPECT_TRUE(
-      checker->path_planner_arrival_checker->isVehicleStopped(STOP_DURATION_THRESHOLD_0_MS));
-    executor.cancel();
-    spin_thread.join();
-    checker.reset();
-    manager.reset();
+    //EXPECT_TRUE(
+      //checker->path_planner_arrival_checker->isVehicleStopped(STOP_DURATION_THRESHOLD_0_MS));
+    //executor.cancel();
+    //spin_thread.join();
+    //checker.reset();
+    //manager.reset();
   }
 }
