@@ -30,7 +30,6 @@ foreach(scene_module IN LISTS scene_modules)
 endforeach()
 
 ament_auto_add_library(behavior_velocity_planner SHARED
-  src/checker.cpp
   src/node.cpp
   src/planner_manager.cpp
   src/utilization/path_utilization.cpp

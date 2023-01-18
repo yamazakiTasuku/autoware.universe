@@ -413,7 +413,7 @@ void BehaviorVelocityPlannerNode::onTrigger(
   const autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg)
 {
   mutex_.lock();  // for planner_data_
-
+  RCLCPP_INFO(get_logger(), "points is empty");
   // Check ready
   try {
     planner_data_.current_pose =
@@ -424,7 +424,7 @@ void BehaviorVelocityPlannerNode::onTrigger(
     return;
   }
 
-  if (!pathChecker(input_path_msg)) {
+  if (pathChecker(input_path_msg)) {
     const std::runtime_error e("points are not given.");
     throw e;
     return;

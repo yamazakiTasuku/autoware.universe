@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BEHAVIOR_PATH_PLANNER__CHECKER__SAMPLE_TEST_HPP_
-#define BEHAVIOR_PATH_PLANNER__CHECKER__SAMPLE_TEST_HPP_
+#ifndef BEHAVIOR_VELOCITY_PLANNER__CHECKER__SAMPLE_TEST_HPP_
+#define BEHAVIOR_VELOCITY_PLANNER__CHECKER__SAMPLE_TEST_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 
+#include <autoware_auto_planning_msgs/msg/path_with_lane_id.hpp>
 #include <autoware_auto_planning_msgs/msg/trajectory.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
-#include <autoware_auto_planning_msgs/msg/path_with_lane_id.hpp>
 
 #include <deque>
 #include <memory>
@@ -28,10 +28,10 @@
 namespace behavior_path_checker
 {
 
+using autoware_auto_planning_msgs::msg::PathWithLaneId;
 using autoware_auto_planning_msgs::msg::Trajectory;
 using geometry_msgs::msg::TwistStamped;
 using nav_msgs::msg::Odometry;
-using autoware_auto_planning_msgs::msg::PathWithLaneId;
 
 class PathPlannerCheckerBase
 {
@@ -82,4 +82,4 @@ private:
 };
 }  // namespace behavior_path_checker
 
-#endif  // BEHAVIOR_PATH_PLANNER__CHECKER__SAMPLE_TEST_HPP_
+#endif  // BEHAVIOR_VELOCITY_PLANNER__CHECKER__SAMPLE_TEST_HPP_

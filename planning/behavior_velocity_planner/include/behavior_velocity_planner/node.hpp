@@ -116,7 +116,8 @@ private:
   // function
   geometry_msgs::msg::PoseStamped getCurrentPose();
   bool isDataReady(const PlannerData planner_data, rclcpp::Clock clock) const;
-  bool pathChecker(const autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg) const;
+  bool pathChecker(
+    const autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg) const;
   autoware_auto_planning_msgs::msg::Path generatePath(
     const autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg,
     const PlannerData & planner_data);

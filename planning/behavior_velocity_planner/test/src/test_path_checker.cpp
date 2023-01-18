@@ -14,7 +14,7 @@
 // limitations under the License.
 #include "behavior_velocity_planner/checker/sample_test.hpp"
 #include "behavior_velocity_planner/node.hpp"
-
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include <rclcpp/rclcpp.hpp>
 
 #include <autoware_auto_planning_msgs/msg/path_with_lane_id.hpp>
@@ -26,22 +26,10 @@
 // using behavior_path_checker::PathPlannerArrivalChecker;
 using autoware_auto_planning_msgs::msg::PathWithLaneId;
 using nav_msgs::msg::Odometry;
-
+using behavior_velocity_planner::BehaviorVelocityPlannerNode;
 using tier4_autoware_utils::createPoint;
 using tier4_autoware_utils::createQuaternion;
 using tier4_autoware_utils::createTranslation;
-
-class CheckerNode : public rclcpp::NodeOptions
-{
-public:
-  CheckerNode() : NodeOptions()
-  {
-    path_planner_arrival_checker =
-      std::make_unique<behavior_velocity_planner::BehaviorVelocityPlannerNode>(this);
-  }
-  std::unique_ptr<behavior_velocity_planner::BehaviorVelocityPlannerNode>
-    path_planner_arrival_checker;
-};
 
 class PubManager : public rclcpp::Node
 {
@@ -49,7 +37,8 @@ public:
   PubManager() : Node("test_pub_node")
   {
     pub_path_ =
-      create_publisher<PathWithLaneId>("/lane_driving/behavior_planning/path_with_lane_id", 1);
+      //create_publisher<Odometry>("/localization/kinematic_state", 1);
+      create_publisher<PathWithLaneId>("/planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id", 1);
   }
 
   rclcpp::Publisher<PathWithLaneId>::SharedPtr pub_path_;
@@ -71,14 +60,13 @@ public:
 TEST(vehicle_stop_checker, isVehicleStopped)
 {
   {
-    auto checker = std::make_shared<behavior_velocity_planner::BehaviorVelocityPlannerNode>();
+    rclcpp::NodeOptions options;
+    const auto share_dir = ament_index_cpp::get_package_share_directory("behavior_velocity_planner");
+    options.arguments({"--ros-args", "--params-file", share_dir + "/config/crosswalk.param.yaml"});
+    
     auto manager = std::make_shared<PubManager>();
     EXPECT_GE(manager->pub_path_->get_subscription_count(), 1U) << "topic is not connected.";
-    // rclcpp::executors::SingleThreadedExecutor executor;
-    // executor.add_node(checker);
-    // executor.add_node(manager);
-    // std::thread spin_thread =
-    // std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
+    auto checker = std::make_shared<BehaviorVelocityPlannerNode>(options);
     // manager->publishPathWithLaneId();
 
     // EXPECT_TRUE(
