@@ -19,6 +19,9 @@
 
 #include <autoware_auto_planning_msgs/msg/path_with_lane_id.hpp>
 
+#include <autoware_auto_perception_msgs/msg/bounding_box.hpp>
+#include <autoware_auto_planning_msgs/msg/trajectory_point.hpp>
+#include <autoware_auto_vehicle_msgs/msg/vehicle_kinematic_state.hpp>
 #include <gtest/gtest.h>
 
 #include <memory>
@@ -26,7 +29,7 @@
 // using behavior_path_checker::PathPlannerArrivalChecker;
 using autoware_auto_planning_msgs::msg::PathWithLaneId;
 using nav_msgs::msg::Odometry;
-using behavior_velocity_planner::BehaviorVelocityPlannerNode;
+using TestNode = behavior_velocity_planner::BehaviorVelocityPlannerNode;
 using tier4_autoware_utils::createPoint;
 using tier4_autoware_utils::createQuaternion;
 using tier4_autoware_utils::createTranslation;
@@ -57,16 +60,34 @@ public:
   }
 };
 
+void declareVehicleInfoParams(rclcpp::NodeOptions & node_options)
+{
+  node_options.append_parameter_override("wheel_radius", 0.5);
+  node_options.append_parameter_override("wheel_width", 0.2);
+  node_options.append_parameter_override("wheel_base", 3.0);
+  node_options.append_parameter_override("wheel_tread", 2.0);
+  node_options.append_parameter_override("front_overhang", 1.0);
+  node_options.append_parameter_override("rear_overhang", 1.0);
+  node_options.append_parameter_override("left_overhang", 0.5);
+  node_options.append_parameter_override("right_overhang", 0.5);
+  node_options.append_parameter_override("vehicle_height", 1.5);
+  node_options.append_parameter_override("max_steer_angle", 0.7);
+}
+
 TEST(vehicle_stop_checker, isVehicleStopped)
 {
   {
-    rclcpp::NodeOptions options;
-    const auto share_dir = ament_index_cpp::get_package_share_directory("behavior_velocity_planner");
-    options.arguments({"--ros-args", "--params-file", share_dir + "/config/crosswalk.param.yaml"});
-    
     auto manager = std::make_shared<PubManager>();
+    const auto vehicle_model_type = GetParam();
+    rclcpp::NodeOptions node_options;
+    node_options.append_parameter_override("initialize_source", "INITIAL_POSE_TOPIC");
+    node_options.append_parameter_override("vehicle_model_type", vehicle_model_type);
+    node_options.append_parameter_override("initial_engage_state", true);
+    node_options.append_parameter_override("add_measurement_noise", false);
+    declareVehicleInfoParams(node_options);
+    auto checker = TestNode(node_options);
     EXPECT_GE(manager->pub_path_->get_subscription_count(), 1U) << "topic is not connected.";
-    auto checker = std::make_shared<BehaviorVelocityPlannerNode>(options);
+    
     // manager->publishPathWithLaneId();
 
     // EXPECT_TRUE(

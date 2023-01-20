@@ -88,7 +88,6 @@ if(BUILD_TESTING)
     test/src/test_path_checker.cpp
   )
   target_link_libraries(pathChecker-test
-    gtest_main
     behavior_velocity_planner
   )
 
