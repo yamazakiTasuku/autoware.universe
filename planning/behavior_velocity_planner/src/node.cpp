@@ -98,6 +98,7 @@ BehaviorVelocityPlannerNode::BehaviorVelocityPlannerNode(const rclcpp::NodeOptio
     this->create_subscription<autoware_auto_planning_msgs::msg::PathWithLaneId>(
       "~/input/path_with_lane_id", 1, std::bind(&BehaviorVelocityPlannerNode::onTrigger, this, _1),
       createSubscriptionOptions(this));
+  
 
   // Subscribers
   sub_predicted_objects_ =
@@ -413,8 +414,14 @@ void BehaviorVelocityPlannerNode::onTrigger(
   const autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg)
 {
   mutex_.lock();  // for planner_data_
-  RCLCPP_INFO(get_logger(), "points is empty");
   // Check ready
+
+  if (!pathChecker(input_path_msg)) {
+    const std::runtime_error e("points are not given.");
+    throw e;
+    return;
+  }
+
   try {
     planner_data_.current_pose =
       transform2pose(tf_buffer_.lookupTransform("map", "base_link", tf2::TimePointZero));
@@ -424,11 +431,7 @@ void BehaviorVelocityPlannerNode::onTrigger(
     return;
   }
 
-  if (pathChecker(input_path_msg)) {
-    const std::runtime_error e("points are not given.");
-    throw e;
-    return;
-  }
+  
 
   if (!isDataReady(planner_data_, *get_clock())) {
     mutex_.unlock();

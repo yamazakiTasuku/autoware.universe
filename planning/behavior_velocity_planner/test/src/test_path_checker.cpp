@@ -12,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <common/types.hpp>
+
 #include "behavior_velocity_planner/checker/sample_test.hpp"
 #include "behavior_velocity_planner/node.hpp"
 #include "ament_index_cpp/get_package_share_directory.hpp"
@@ -25,6 +27,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <string>
 #include <vector>
 // using behavior_path_checker::PathPlannerArrivalChecker;
 using autoware_auto_planning_msgs::msg::PathWithLaneId;
@@ -41,7 +44,7 @@ public:
   {
     pub_path_ =
       //create_publisher<Odometry>("/localization/kinematic_state", 1);
-      create_publisher<PathWithLaneId>("/planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id", 1);
+      create_publisher<PathWithLaneId>("/behavior_velocity_planner_node/input/path_with_lane_id", 1);
   }
 
   rclcpp::Publisher<PathWithLaneId>::SharedPtr pub_path_;
@@ -54,7 +57,7 @@ public:
       const auto now = this->now();
       PathWithLaneId pathwithlaneid;
       pathwithlaneid.header.stamp = now;
-
+      this->pub_path_->publish(pathwithlaneid);
       rclcpp::WallRate(10).sleep();
     }
   }
@@ -72,30 +75,46 @@ void declareVehicleInfoParams(rclcpp::NodeOptions & node_options)
   node_options.append_parameter_override("right_overhang", 0.5);
   node_options.append_parameter_override("vehicle_height", 1.5);
   node_options.append_parameter_override("max_steer_angle", 0.7);
+  node_options.append_parameter_override("ego_nearest_dist_threshold", 3.0);
+  node_options.append_parameter_override("ego_nearest_yaw_threshold", 1.046);
 }
 
 TEST(vehicle_stop_checker, isVehicleStopped)
 {
   {
+
+    autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg;
+
+    
     auto manager = std::make_shared<PubManager>();
-    const auto vehicle_model_type = GetParam();
+    //const auto vehicle_model_type = GetParam();
     rclcpp::NodeOptions node_options;
+    
     node_options.append_parameter_override("initialize_source", "INITIAL_POSE_TOPIC");
-    node_options.append_parameter_override("vehicle_model_type", vehicle_model_type);
+    //node_options.append_parameter_override("vehicle_model_type", vehicle_model_type);
     node_options.append_parameter_override("initial_engage_state", true);
     node_options.append_parameter_override("add_measurement_noise", false);
     declareVehicleInfoParams(node_options);
-    auto checker = TestNode(node_options);
+    auto checker = std::make_shared<TestNode>(node_options);
+
+
     EXPECT_GE(manager->pub_path_->get_subscription_count(), 1U) << "topic is not connected.";
-    
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(checker);
+    executor.add_node(manager);
+    std::thread spin_thread =
+      std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
+    manager->publishPathWithLaneId();
+
+    //EXPECT_THROW(checker->pathChecker(input_path_msg), std::invalid_argument);
     // manager->publishPathWithLaneId();
 
     // EXPECT_TRUE(
     // checker->path_planner_arrival_checker->isVehicleStopped(STOP_DURATION_THRESHOLD_0_MS));
-    // executor.cancel();
-    // spin_thread.join();
-    // checker.reset();
-    // manager.reset();
+     executor.cancel();
+     spin_thread.join();
+     checker.reset();
+     manager.reset();
   }
 }
 
