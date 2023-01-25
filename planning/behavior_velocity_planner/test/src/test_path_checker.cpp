@@ -65,6 +65,9 @@ public:
 
 void declareVehicleInfoParams(rclcpp::NodeOptions & node_options)
 {
+  node_options.append_parameter_override("initial_engage_state", true);
+  node_options.append_parameter_override("add_measurement_noise", false);
+  node_options.append_parameter_override("initialize_source", "INITIAL_POSE_TOPIC");
   node_options.append_parameter_override("wheel_radius", 0.5);
   node_options.append_parameter_override("wheel_width", 0.2);
   node_options.append_parameter_override("wheel_base", 3.0);
@@ -89,11 +92,6 @@ TEST(vehicle_stop_checker, isVehicleStopped)
     auto manager = std::make_shared<PubManager>();
     //const auto vehicle_model_type = GetParam();
     rclcpp::NodeOptions node_options;
-    
-    node_options.append_parameter_override("initialize_source", "INITIAL_POSE_TOPIC");
-    //node_options.append_parameter_override("vehicle_model_type", vehicle_model_type);
-    node_options.append_parameter_override("initial_engage_state", true);
-    node_options.append_parameter_override("add_measurement_noise", false);
     declareVehicleInfoParams(node_options);
     auto checker = std::make_shared<TestNode>(node_options);
 
@@ -104,14 +102,12 @@ TEST(vehicle_stop_checker, isVehicleStopped)
     executor.add_node(manager);
     std::thread spin_thread =
       std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
-    manager->publishPathWithLaneId();
-
-    //EXPECT_THROW(checker->pathChecker(input_path_msg), std::invalid_argument);
-    // manager->publishPathWithLaneId();
-
-    // EXPECT_TRUE(
-    // checker->path_planner_arrival_checker->isVehicleStopped(STOP_DURATION_THRESHOLD_0_MS));
-     executor.cancel();
+    const auto now = this->now();
+    PathWithLaneId pathwithlaneid;
+    pathwithlaneid.header.stamp = now;
+    EXPECT_THROW(checker->onTrigger(pathwithlaneid),std::runtime_error);
+    EXPECT_THROW(manager->publishPathWithLaneId(),std::runtime_error);
+    executor.cancel();
      spin_thread.join();
      checker.reset();
      manager.reset();
