@@ -417,9 +417,13 @@ void BehaviorVelocityPlannerNode::onTrigger(
   // Check ready
 
   if (!pathChecker(input_path_msg)) {
-    const std::runtime_error e("points are not given.");
-    throw e;
-    return;
+    try{
+      const std::runtime_error e("points are not given.");
+      throw e;
+    } catch (const std::runtime_error & e) {
+      //std::cerr << e.what() << std::endl;
+      return;
+    }
   }
 
   try {

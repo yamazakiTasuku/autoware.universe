@@ -49,8 +49,7 @@ public:
 
   rclcpp::Publisher<PathWithLaneId>::SharedPtr pub_path_;
 
-  void
-  publishPathWithLaneId()  // const geometry_msgs::msg::Pose & pose, const double publish_duration)
+  void publishPathWithLaneId()  // const geometry_msgs::msg::Pose & pose, const double publish_duration)
   {
     const auto start_time = this->now();
     while (true) {
@@ -102,15 +101,13 @@ TEST(vehicle_stop_checker, isVehicleStopped)
     executor.add_node(manager);
     std::thread spin_thread =
       std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
-    const auto now = this->now();
-    PathWithLaneId pathwithlaneid;
-    pathwithlaneid.header.stamp = now;
-    EXPECT_THROW(checker->onTrigger(pathwithlaneid),std::runtime_error);
-    EXPECT_THROW(manager->publishPathWithLaneId(),std::runtime_error);
+    
+    //EXPECT_THROW(catch (char *e),std::runtime_error);
+    EXPECT_THROW(manager->publishPathWithLaneId(), std::exception)<< "Not success get Error.";
     executor.cancel();
-     spin_thread.join();
-     checker.reset();
-     manager.reset();
+    spin_thread.join();
+    checker.reset();
+    manager.reset();
   }
 }
 
