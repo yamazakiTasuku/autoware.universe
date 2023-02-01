@@ -22,7 +22,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-// using behavior_path_checker::PathPlannerArrivalChecker;
+
 using autoware_auto_planning_msgs::msg::PathWithLaneId;
 using nav_msgs::msg::Odometry;
 using TestNode = behavior_velocity_planner::BehaviorVelocityPlannerNode;
@@ -39,7 +39,7 @@ public:
       create_publisher<PathWithLaneId>("/behavior_velocity_planner_node/input/path_with_lane_id", 1);
   }
   rclcpp::Publisher<PathWithLaneId>::SharedPtr pub_path_;
-  void publishPathWithLaneId()  // const geometry_msgs::msg::Pose & pose, const double publish_duration)
+  void publishPathWithLaneId() 
   {
     const auto now = this->now();
     PathWithLaneId pathwithlaneid;
@@ -79,12 +79,21 @@ TEST(vehicle_stop_checker, isVehicleStopped)
     rclcpp::executors::SingleThreadedExecutor executor;
     executor.add_node(checker);
     executor.add_node(manager);
-    std::thread spin_thread([&executor]{
+
+    std::thread spin_thread1([&executor]{
       EXPECT_THROW(executor.spin(), std::invalid_argument)<< "empty topic is not found.";
     });
     manager->publishPathWithLaneId();
+    spin_thread1.join();
+    
+    std::thread spin_thread2 =
+      std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
+    testing::internal::CaptureStderr();
+    manager->publishPathWithLaneId();
+    ASSERT_STREQ("some_exception: Points is empty.",testing::internal::GetCapturedStderr().c_str())<< "error output is not correct.";
+
     executor.cancel();
-    spin_thread.join();
+    spin_thread2.join();
     checker.reset();
     manager.reset();
   }
