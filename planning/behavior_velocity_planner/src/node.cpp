@@ -414,17 +414,9 @@ void BehaviorVelocityPlannerNode::onTrigger(
   const autoware_auto_planning_msgs::msg::PathWithLaneId::ConstSharedPtr input_path_msg)
 {
   mutex_.lock();  // for planner_data_
+  
   // Check ready
-
-  if (!pathChecker(input_path_msg)) {
-    try{
-      const std::runtime_error e("points are not given.");
-      throw e;
-    } catch (const std::runtime_error & e) {
-      //std::cerr << e.what() << std::endl;
-      return;
-    }
-  }
+  motion_utils::validateNonEmpty(input_path_msg->points);
 
   try {
     planner_data_.current_pose =
