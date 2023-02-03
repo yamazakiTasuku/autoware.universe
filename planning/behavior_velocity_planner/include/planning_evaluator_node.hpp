@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PLANNING_EVALUATOR__PLANNING_EVALUATOR_NODE_HPP_
-#define PLANNING_EVALUATOR__PLANNING_EVALUATOR_NODE_HPP_
+#ifndef PLANNING_EVALUATOR_NODE_HPP_
+#define PLANNING_EVALUATOR_NODE_HPP_
 
 #include "planning_evaluator/metrics_calculator.hpp"
 #include "planning_evaluator/stat.hpp"
@@ -102,4 +102,4 @@ private:
 };
 }  // namespace planning_diagnostics
 
-#endif  // PLANNING_EVALUATOR__PLANNING_EVALUATOR_NODE_HPP_
+#endif  // PLANNING_EVALUATOR_NODE_HPP_

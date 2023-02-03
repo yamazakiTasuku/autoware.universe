@@ -98,7 +98,6 @@ BehaviorVelocityPlannerNode::BehaviorVelocityPlannerNode(const rclcpp::NodeOptio
     this->create_subscription<autoware_auto_planning_msgs::msg::PathWithLaneId>(
       "~/input/path_with_lane_id", 1, std::bind(&BehaviorVelocityPlannerNode::onTrigger, this, _1),
       createSubscriptionOptions(this));
-  
 
   // Subscribers
   sub_predicted_objects_ =
@@ -406,9 +405,9 @@ void BehaviorVelocityPlannerNode::onTrigger(
   mutex_.lock();  // for planner_data_
 
   // Check ready
-  try{
+  try {
     motion_utils::validateNonEmpty(input_path_msg->points);
-  } catch(std::invalid_argument & e){
+  } catch (std::invalid_argument & e) {
     std::cerr << "some_exception: " << e.what() << std::flush;
     return;
   }
@@ -421,8 +420,6 @@ void BehaviorVelocityPlannerNode::onTrigger(
     mutex_.unlock();
     return;
   }
-
-  
 
   if (!isDataReady(planner_data_, *get_clock())) {
     mutex_.unlock();

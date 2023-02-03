@@ -13,10 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <nav_msgs/msg/odometry.hpp>
 #include "behavior_velocity_planner/node.hpp"
-#include <autoware_auto_planning_msgs/msg/path_with_lane_id.hpp>
+
 #include <rclcpp/rclcpp.hpp>
+
+#include <autoware_auto_planning_msgs/msg/path_with_lane_id.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+
 #include <gtest/gtest.h>
 
 #include <memory>
@@ -35,11 +38,11 @@ class PubManager : public rclcpp::Node
 public:
   PubManager() : Node("test_pub_node")
   {
-    pub_path_ =
-      create_publisher<PathWithLaneId>("/behavior_velocity_planner_node/input/path_with_lane_id", 1);
+    pub_path_ = create_publisher<PathWithLaneId>(
+      "/behavior_velocity_planner_node/input/path_with_lane_id", 1);
   }
   rclcpp::Publisher<PathWithLaneId>::SharedPtr pub_path_;
-  void publishPathWithLaneId() 
+  void publishPathWithLaneId()
   {
     const auto now = this->now();
     PathWithLaneId pathwithlaneid;
@@ -80,22 +83,15 @@ TEST(vehicle_stop_checker, isVehicleStopped)
     executor.add_node(checker);
     executor.add_node(manager);
 
-    std::thread spin_thread1([&executor]{
-      EXPECT_THROW(executor.spin(), std::invalid_argument)<< "empty topic is not found.";
-    });
-    manager->publishPathWithLaneId();
-    spin_thread1.join();
-    
-    std::thread spin_thread2 =
-      std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
+    std::thread spin_thread1(
+      [&executor] { ASSERT_NO_THROW(executor.spin_some()) << "error is throwed."; });
     testing::internal::CaptureStderr();
     manager->publishPathWithLaneId();
-    ASSERT_STREQ("some_exception: Points is empty.",testing::internal::GetCapturedStderr().c_str())<< "error output is not correct.";
-
+    ASSERT_STREQ("some_exception: Points is empty.", testing::internal::GetCapturedStderr().c_str())
+      << "error output is not correct.";
+    spin_thread1.join();
     executor.cancel();
-    spin_thread2.join();
     checker.reset();
     manager.reset();
   }
 }
-
