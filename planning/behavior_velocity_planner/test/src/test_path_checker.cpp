@@ -82,16 +82,18 @@ TEST(vehicle_stop_checker, isVehicleStopped)
     rclcpp::executors::SingleThreadedExecutor executor;
     executor.add_node(checker);
     executor.add_node(manager);
-
-    std::thread spin_thread1(
-      [&executor] { ASSERT_NO_THROW(executor.spin_some()) << "error is throwed."; });
+    std::thread spin_thread =
+      std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
+    ASSERT_NO_THROW(executor.spin_some()) << "error is throwed.";
+    
     testing::internal::CaptureStderr();
     manager->publishPathWithLaneId();
     ASSERT_STREQ("some_exception: Points is empty.", testing::internal::GetCapturedStderr().c_str())
       << "error output is not correct.";
-    spin_thread1.join();
     executor.cancel();
+    spin_thread.join();
     checker.reset();
     manager.reset();
   }
+  
 }
