@@ -71,6 +71,7 @@ void declareVehicleInfoParams(rclcpp::NodeOptions & node_options)
   node_options.append_parameter_override("ego_nearest_yaw_threshold", 1.046);
 }
 
+
 TEST(vehicle_stop_checker, isVehicleStopped)
 {
   {
@@ -82,9 +83,8 @@ TEST(vehicle_stop_checker, isVehicleStopped)
     rclcpp::executors::SingleThreadedExecutor executor;
     executor.add_node(checker);
     executor.add_node(manager);
-    std::thread spin_thread =
-      std::thread(std::bind(&rclcpp::executors::SingleThreadedExecutor::spin, &executor));
-    ASSERT_NO_THROW(executor.spin_some()) << "error is throwed.";
+    std::thread spin_thread(
+      [&executor] { ASSERT_NO_THROW(executor.spin_some()) << "error is throwed."; });
     
     testing::internal::CaptureStderr();
     manager->publishPathWithLaneId();
@@ -92,8 +92,8 @@ TEST(vehicle_stop_checker, isVehicleStopped)
       << "error output is not correct.";
     executor.cancel();
     spin_thread.join();
+    
     checker.reset();
     manager.reset();
   }
-  
 }
