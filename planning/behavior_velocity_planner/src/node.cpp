@@ -405,7 +405,7 @@ void BehaviorVelocityPlannerNode::onTrigger(
   mutex_.lock();  // for planner_data_
 
   // Check ready
-  
+
   try {
     motion_utils::validateNonEmpty(input_path_msg->points);
   } catch (std::invalid_argument & e) {
