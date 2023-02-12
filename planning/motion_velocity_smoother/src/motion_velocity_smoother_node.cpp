@@ -41,7 +41,7 @@ MotionVelocitySmootherNode::MotionVelocitySmootherNode(const rclcpp::NodeOptions
   // set common params
   const auto vehicle_info = VehicleInfoUtil(*this).getVehicleInfo();
   wheelbase_ = vehicle_info.wheel_base_m;
-  initCommonParam();
+
   over_stop_velocity_warn_thr_ =
     declare_parameter("over_stop_velocity_warn_thr", tier4_autoware_utils::kmph2mps(5.0));
 
@@ -101,7 +101,7 @@ MotionVelocitySmootherNode::MotionVelocitySmootherNode(const rclcpp::NodeOptions
     std::bind(&MotionVelocitySmootherNode::onParameter, this, _1));
 
   // debug
-  publish_debug_trajs_ = declare_parameter("publish_debug_trajs", true);
+
   debug_closest_velocity_ = create_publisher<Float32Stamped>("~/closest_velocity", 1);
   debug_closest_acc_ = create_publisher<Float32Stamped>("~/closest_acceleration", 1);
   debug_closest_jerk_ = create_publisher<Float32Stamped>("~/closest_jerk", 1);
@@ -240,38 +240,6 @@ rcl_interfaces::msg::SetParametersResult MotionVelocitySmootherNode::onParameter
   return result;
 }
 
-void MotionVelocitySmootherNode::initCommonParam()
-{
-  auto & p = node_param_;
-  p.max_velocity = declare_parameter("max_velocity", 20.0);  // 72.0 kmph
-  p.margin_to_insert_external_velocity_limit =
-    declare_parameter("margin_to_insert_external_velocity_limit", 0.3);
-  p.replan_vel_deviation = declare_parameter("replan_vel_deviation", 3.0);
-  p.engage_velocity = declare_parameter("engage_velocity", 0.3);
-  p.engage_acceleration = declare_parameter("engage_acceleration", 0.1);
-  p.engage_exit_ratio = declare_parameter("engage_exit_ratio", 0.5);
-  p.engage_exit_ratio = std::min(std::max(p.engage_exit_ratio, 0.0), 1.0);
-  p.stopping_velocity =
-    declare_parameter("stopping_velocity", tier4_autoware_utils::kmph2mps(10.0));
-  p.stopping_distance = declare_parameter("stopping_distance", 0.0);
-  p.extract_ahead_dist = declare_parameter("extract_ahead_dist", 200.0);
-  p.extract_behind_dist = declare_parameter("extract_behind_dist", 3.0);
-  p.stop_dist_to_prohibit_engage = declare_parameter("stop_dist_to_prohibit_engage", 1.5);
-  p.ego_nearest_dist_threshold = declare_parameter<double>("ego_nearest_dist_threshold");
-  p.ego_nearest_yaw_threshold = declare_parameter<double>("ego_nearest_yaw_threshold");
-  p.post_resample_param.max_trajectory_length =
-    declare_parameter("post_max_trajectory_length", 300.0);
-  p.post_resample_param.min_trajectory_length =
-    declare_parameter("post_min_trajectory_length", 30.0);
-  p.post_resample_param.resample_time = declare_parameter("post_resample_time", 10.0);
-  p.post_resample_param.dense_resample_dt = declare_parameter("post_dense_resample_dt", 0.1);
-  p.post_resample_param.dense_min_interval_distance =
-    declare_parameter("post_dense_min_interval_distance", 0.1);
-  p.post_resample_param.sparse_resample_dt = declare_parameter("post_sparse_resample_dt", 0.1);
-  p.post_resample_param.sparse_min_interval_distance =
-    declare_parameter("post_sparse_min_interval_distance", 1.0);
-  p.algorithm_type = getAlgorithmType(declare_parameter("algorithm_type", "JerkFiltered"));
-}
 
 void MotionVelocitySmootherNode::publishTrajectory(const TrajectoryPoints & trajectory) const
 {

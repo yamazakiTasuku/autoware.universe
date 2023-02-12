@@ -287,111 +287,10 @@ ObstacleAvoidancePlanner::ObstacleAvoidancePlanner(const rclcpp::NodeOptions & n
     vehicle_param_.wheel_tread = vehicle_info.wheel_tread_m;
   }
 
-  {  // option parameter
-    is_publishing_debug_visualization_marker_ =
-      declare_parameter<bool>("option.is_publishing_debug_visualization_marker");
-    is_publishing_clearance_map_ = declare_parameter<bool>("option.is_publishing_clearance_map");
-    is_publishing_object_clearance_map_ =
-      declare_parameter<bool>("option.is_publishing_object_clearance_map");
-    is_publishing_area_with_objects_ =
-      declare_parameter<bool>("option.is_publishing_area_with_objects");
 
-    is_showing_debug_info_ = declare_parameter<bool>("option.is_showing_debug_info");
-    is_showing_calculation_time_ = declare_parameter<bool>("option.is_showing_calculation_time");
-    is_stopping_if_outside_drivable_area_ =
-      declare_parameter<bool>("option.is_stopping_if_outside_drivable_area");
-
-    enable_avoidance_ = declare_parameter<bool>("option.enable_avoidance");
-    enable_pre_smoothing_ = declare_parameter<bool>("option.enable_pre_smoothing");
-    skip_optimization_ = declare_parameter<bool>("option.skip_optimization");
-    reset_prev_optimization_ = declare_parameter<bool>("option.reset_prev_optimization");
-    is_considering_footprint_edges_ =
-      declare_parameter<bool>("option.is_considering_footprint_edges");
-  }
-
-  {  // trajectory parameter
-    traj_param_ = TrajectoryParam{};
-
-    // common
-    traj_param_.num_sampling_points = declare_parameter<int>("common.num_sampling_points");
-    traj_param_.trajectory_length = declare_parameter<double>("common.trajectory_length");
-    traj_param_.forward_fixing_min_distance =
-      declare_parameter<double>("common.forward_fixing_min_distance");
-    traj_param_.forward_fixing_min_time =
-      declare_parameter<double>("common.forward_fixing_min_time");
-    traj_param_.backward_fixing_distance =
-      declare_parameter<double>("common.backward_fixing_distance");
-    traj_param_.delta_arc_length_for_trajectory =
-      declare_parameter<double>("common.delta_arc_length_for_trajectory");
-
-    traj_param_.delta_dist_threshold_for_closest_point =
-      declare_parameter<double>("common.delta_dist_threshold_for_closest_point");
-    traj_param_.delta_yaw_threshold_for_closest_point =
-      declare_parameter<double>("common.delta_yaw_threshold_for_closest_point");
-    traj_param_.delta_yaw_threshold_for_straight =
-      declare_parameter<double>("common.delta_yaw_threshold_for_straight");
-
-    traj_param_.num_fix_points_for_extending =
-      declare_parameter<int>("common.num_fix_points_for_extending");
-    traj_param_.max_dist_for_extending_end_point =
-      declare_parameter<double>("common.max_dist_for_extending_end_point");
-    traj_param_.non_fixed_trajectory_length =
-      declare_parameter<double>("common.non_fixed_trajectory_length");
-
-    traj_param_.enable_clipping_fixed_traj =
-      declare_parameter<bool>("common.enable_clipping_fixed_traj");
-
-    // object
-    traj_param_.max_avoiding_ego_velocity_ms =
-      declare_parameter<double>("object.max_avoiding_ego_velocity_ms");
-    traj_param_.max_avoiding_objects_velocity_ms =
-      declare_parameter<double>("object.max_avoiding_objects_velocity_ms");
-    traj_param_.is_avoiding_unknown =
-      declare_parameter<bool>("object.avoiding_object_type.unknown", true);
-    traj_param_.is_avoiding_car = declare_parameter<bool>("object.avoiding_object_type.car", true);
-    traj_param_.is_avoiding_truck =
-      declare_parameter<bool>("object.avoiding_object_type.truck", true);
-    traj_param_.is_avoiding_bus = declare_parameter<bool>("object.avoiding_object_type.bus", true);
-    traj_param_.is_avoiding_bicycle =
-      declare_parameter<bool>("object.avoiding_object_type.bicycle", true);
-    traj_param_.is_avoiding_motorbike =
-      declare_parameter<bool>("object.avoiding_object_type.motorbike", true);
-    traj_param_.is_avoiding_pedestrian =
-      declare_parameter<bool>("object.avoiding_object_type.pedestrian", true);
-    traj_param_.is_avoiding_animal =
-      declare_parameter<bool>("object.avoiding_object_type.animal", true);
-
-    // ego nearest search
-    traj_param_.ego_nearest_dist_threshold =
-      declare_parameter<double>("ego_nearest_dist_threshold");
-    traj_param_.ego_nearest_yaw_threshold = declare_parameter<double>("ego_nearest_yaw_threshold");
-  }
 
   {  // elastic band parameter
     eb_param_ = EBParam{};
-
-    // common
-    eb_param_.num_joint_buffer_points =
-      declare_parameter<int>("advanced.eb.common.num_joint_buffer_points");
-    eb_param_.num_offset_for_begin_idx =
-      declare_parameter<int>("advanced.eb.common.num_offset_for_begin_idx");
-    eb_param_.delta_arc_length_for_eb =
-      declare_parameter<double>("advanced.eb.common.delta_arc_length_for_eb");
-    eb_param_.num_sampling_points_for_eb =
-      declare_parameter<int>("advanced.eb.common.num_sampling_points_for_eb");
-
-    // clearance
-    eb_param_.clearance_for_straight_line =
-      declare_parameter<double>("advanced.eb.clearance.clearance_for_straight_line");
-    eb_param_.clearance_for_joint =
-      declare_parameter<double>("advanced.eb.clearance.clearance_for_joint");
-    eb_param_.clearance_for_only_smoothing =
-      declare_parameter<double>("advanced.eb.clearance.clearance_for_only_smoothing");
-
-    // qp
-    eb_param_.qp_param.max_iteration = declare_parameter<int>("advanced.eb.qp.max_iteration");
-    eb_param_.qp_param.eps_abs = declare_parameter<double>("advanced.eb.qp.eps_abs");
-    eb_param_.qp_param.eps_rel = declare_parameter<double>("advanced.eb.qp.eps_rel");
 
     // other
     eb_param_.clearance_for_fixing = 0.0;
@@ -401,48 +300,12 @@ ObstacleAvoidancePlanner::ObstacleAvoidancePlanner(const rclcpp::NodeOptions & n
     mpt_param_ = MPTParam{};
 
     // option
-    // TODO(murooka) implement plan_from_ego
-    mpt_param_.plan_from_ego = declare_parameter<bool>("mpt.option.plan_from_ego");
-    mpt_param_.max_plan_from_ego_length =
-      declare_parameter<double>("mpt.option.max_plan_from_ego_length");
-    mpt_param_.steer_limit_constraint =
-      declare_parameter<bool>("mpt.option.steer_limit_constraint");
-    mpt_param_.fix_points_around_ego = declare_parameter<bool>("mpt.option.fix_points_around_ego");
-    mpt_param_.enable_warm_start = declare_parameter<bool>("mpt.option.enable_warm_start");
-    mpt_param_.enable_manual_warm_start =
-      declare_parameter<bool>("mpt.option.enable_manual_warm_start");
-    mpt_visualize_sampling_num_ = declare_parameter<int>("mpt.option.visualize_sampling_num");
-    mpt_param_.is_fixed_point_single = declare_parameter<bool>("mpt.option.is_fixed_point_single");
-
-    // common
-    mpt_param_.num_curvature_sampling_points =
-      declare_parameter<int>("mpt.common.num_curvature_sampling_points");
-
-    mpt_param_.delta_arc_length_for_mpt_points =
-      declare_parameter<double>("mpt.common.delta_arc_length_for_mpt_points");
 
     // kinematics
     mpt_param_.max_steer_rad = vehicle_info.max_steer_angle_rad;
 
-    // By default, optimization_center_offset will be vehicle_info.wheel_base * 0.8
-    // The 0.8 scale is adopted as it performed the best.
-    constexpr double default_wheelbase_ratio = 0.8;
-    mpt_param_.optimization_center_offset = declare_parameter<double>(
-      "mpt.kinematics.optimization_center_offset",
-      vehicle_param_.wheelbase * default_wheelbase_ratio);
 
-    // bounds search
-    mpt_param_.bounds_search_widths =
-      declare_parameter<std::vector<double>>("advanced.mpt.bounds_search_widths");
-
-    // collision free constraints
-    mpt_param_.l_inf_norm =
-      declare_parameter<bool>("advanced.mpt.collision_free_constraints.option.l_inf_norm");
-    mpt_param_.soft_constraint =
-      declare_parameter<bool>("advanced.mpt.collision_free_constraints.option.soft_constraint");
-    mpt_param_.hard_constraint =
-      declare_parameter<bool>("advanced.mpt.collision_free_constraints.option.hard_constraint");
-
+    
     // TODO(murooka) implement two-step soft constraint
     mpt_param_.two_step_soft_constraint = false;
     // mpt_param_.two_step_soft_constraint =
@@ -508,60 +371,9 @@ ObstacleAvoidancePlanner::ObstacleAvoidancePlanner(const rclcpp::NodeOptions & n
       }
     }
 
-    // clearance
-    mpt_param_.hard_clearance_from_road =
-      declare_parameter<double>("advanced.mpt.clearance.hard_clearance_from_road");
-    mpt_param_.soft_clearance_from_road =
-      declare_parameter<double>("advanced.mpt.clearance.soft_clearance_from_road");
-    mpt_param_.soft_second_clearance_from_road =
-      declare_parameter<double>("advanced.mpt.clearance.soft_second_clearance_from_road");
-    mpt_param_.extra_desired_clearance_from_road =
-      declare_parameter<double>("advanced.mpt.clearance.extra_desired_clearance_from_road");
-    mpt_param_.clearance_from_object =
-      declare_parameter<double>("advanced.mpt.clearance.clearance_from_object");
-
-    // weight
-    mpt_param_.soft_avoidance_weight =
-      declare_parameter<double>("advanced.mpt.weight.soft_avoidance_weight");
-    mpt_param_.soft_second_avoidance_weight =
-      declare_parameter<double>("advanced.mpt.weight.soft_second_avoidance_weight");
-
-    mpt_param_.lat_error_weight = declare_parameter<double>("advanced.mpt.weight.lat_error_weight");
-    mpt_param_.yaw_error_weight = declare_parameter<double>("advanced.mpt.weight.yaw_error_weight");
-    mpt_param_.yaw_error_rate_weight =
-      declare_parameter<double>("advanced.mpt.weight.yaw_error_rate_weight");
-    mpt_param_.steer_input_weight =
-      declare_parameter<double>("advanced.mpt.weight.steer_input_weight");
-    mpt_param_.steer_rate_weight =
-      declare_parameter<double>("advanced.mpt.weight.steer_rate_weight");
-
-    mpt_param_.obstacle_avoid_lat_error_weight =
-      declare_parameter<double>("advanced.mpt.weight.obstacle_avoid_lat_error_weight");
-    mpt_param_.obstacle_avoid_yaw_error_weight =
-      declare_parameter<double>("advanced.mpt.weight.obstacle_avoid_yaw_error_weight");
-    mpt_param_.obstacle_avoid_steer_input_weight =
-      declare_parameter<double>("advanced.mpt.weight.obstacle_avoid_steer_input_weight");
-    mpt_param_.near_objects_length =
-      declare_parameter<double>("advanced.mpt.weight.near_objects_length");
-
-    mpt_param_.terminal_lat_error_weight =
-      declare_parameter<double>("advanced.mpt.weight.terminal_lat_error_weight");
-    mpt_param_.terminal_yaw_error_weight =
-      declare_parameter<double>("advanced.mpt.weight.terminal_yaw_error_weight");
-    mpt_param_.terminal_path_lat_error_weight =
-      declare_parameter<double>("advanced.mpt.weight.terminal_path_lat_error_weight");
-    mpt_param_.terminal_path_yaw_error_weight =
-      declare_parameter<double>("advanced.mpt.weight.terminal_path_yaw_error_weight");
+    
   }
 
-  {  // replan
-    max_path_shape_change_dist_for_replan_ =
-      declare_parameter<double>("replan.max_path_shape_change_dist");
-    max_ego_moving_dist_for_replan_ =
-      declare_parameter<double>("replan.max_ego_moving_dist_for_replan");
-    max_delta_time_sec_for_replan_ =
-      declare_parameter<double>("replan.max_delta_time_sec_for_replan");
-  }
 
   // TODO(murooka) tune this param when avoiding with obstacle_avoidance_planner
   traj_param_.center_line_width = vehicle_param_.width;

@@ -117,7 +117,7 @@ void DefaultPlanner::initialize_common(rclcpp::Node * node)
     node_->create_publisher<MarkerArray>("debug/goal_footprint", durable_qos);
 
   vehicle_info_ = vehicle_info_util::VehicleInfoUtil(*node_).getVehicleInfo();
-  param_.goal_angle_threshold_deg = node_->declare_parameter("goal_angle_threshold_deg", 45.0);
+
 }
 
 void DefaultPlanner::initialize(rclcpp::Node * node)
